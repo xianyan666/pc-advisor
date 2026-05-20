@@ -11,7 +11,7 @@ import java.net.URL
 
 class ApiProxyWebViewClient(
     private val context: Context,
-    serverBaseUrl: String
+    private val serverBaseUrl: String
 ) : WebViewClient() {
 
     private val apiProxyJs: String =
