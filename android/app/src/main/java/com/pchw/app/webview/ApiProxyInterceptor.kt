@@ -11,85 +11,70 @@ import java.net.URL
 
 class ApiProxyWebViewClient(
     private val context: Context,
-    private val serverBaseUrl: String
+    serverBaseUrl: String
 ) : WebViewClient() {
 
-    private val apiProxyJs: String by lazy {
+    private val apiProxyJs: String =
         loadProxyScript().replace("__SERVER_BASE__", serverBaseUrl)
+
+    /**
+     * Read index.html from assets, remove crossorigin attrs,
+     * inject API proxy script, return the modified HTML.
+     */
+    fun buildIndexHtml(): String {
+        val html = context.assets.open("www/index.html").bufferedReader().use { it.readText() }
+        return html
+            .replace("crossorigin ", "")
+            .replace("<head>", "<head>\n<script>$apiProxyJs</script>")
     }
 
     override fun shouldInterceptRequest(
         view: WebView,
         request: WebResourceRequest
     ): WebResourceResponse? {
-        val urlString = request.url.toString()
+        val url = request.url
+        val host = url.host
+        val path = url.path ?: ""
 
-        // Case 1: Main frame loading index.html — inject proxy + rewrite paths
-        if (request.isForMainFrame && (urlString.endsWith("index.html") || urlString.endsWith("www/"))) {
-            return injectAndRewriteHtml(urlString)
-        }
+        // Only intercept requests to our virtual localhost origin
+        if (host != "localhost") return null
 
-        // Case 2: file:///favicon.ico — serve from assets
-        if (urlString.startsWith("file://") && urlString.endsWith("/favicon.ico")) {
-            return loadFromAssets("www/favicon.ico")
-        }
+        return when {
+            // Static assets
+            path.startsWith("/assets/") -> loadFromAssets("www$path")
+            path == "/favicon.ico" -> loadFromAssets("www/favicon.ico")
 
-        // Case 3: /images/evaluations/* — proxy to backend (user uploaded images)
-        if (urlString.contains("/images/evaluations/")) {
-            val imgPath = urlString.substringAfterLast("/images/evaluations/")
-            if (imgPath.isNotBlank()) {
-                return proxyToServer("$serverBaseUrl/images/evaluations/$imgPath")
+            // Product images — bundled locally
+            path.startsWith("/images/products/") -> loadFromAssets("www$path")
+
+            // Evaluation images — proxy to real backend
+            path.startsWith("/images/evaluations/") ->
+                proxyToServer("$serverBaseUrl$path")
+
+            // SPA fallback: Vue router paths → return index.html
+            request.isForMainFrame -> {
+                val html = buildIndexHtml()
+                WebResourceResponse("text/html", "UTF-8",
+                    ByteArrayInputStream(html.toByteArray(Charsets.UTF_8)))
             }
-        }
 
-        // Case 4: SPA fallback — vue router paths without file extension
-        if (urlString.startsWith("file://") && urlString.contains("android_asset/www") && request.isForMainFrame) {
-            val afterWww = urlString.substringAfter("www/")
-            if (afterWww.isNotBlank() && !afterWww.contains(".")) {
-                return injectAndRewriteHtml(urlString.substringBefore("www/") + "www/index.html")
-            }
-        }
-
-        return null
-    }
-
-    /**
-     * Read index.html from assets, inject the API proxy script,
-     * rewrite absolute paths to relative paths, and remove crossorigin attrs.
-     */
-    private fun injectAndRewriteHtml(urlString: String): WebResourceResponse? {
-        return try {
-            val assetPath = urlString.substringAfter("android_asset/").ifBlank { "www/index.html" }
-            val inputStream = context.assets.open(assetPath)
-            val html = inputStream.bufferedReader().use { it.readText() }
-
-            var modifiedHtml = html
-                // Rewrite absolute paths to relative for local loading
-                .replace("href=\"/assets/", "href=\"assets/")
-                .replace("src=\"/assets/", "src=\"assets/")
-                .replace("href=\"/favicon.ico\"", "href=\"favicon.ico\"")
-                .replace("href=\"/images/products/", "href=\"images/products/")
-                .replace("src=\"/images/products/", "src=\"images/products/")
-                // Remove crossorigin attributes (CORS not supported on file://)
-                .replace("crossorigin ", "")
-                .replace("crossorigin>", ">")
-                // Inject JS proxy after <head>
-                .replaceFirst("<head>", "<head>\n<script>$apiProxyJs</script>")
-
-            WebResourceResponse(
-                "text/html",
-                "UTF-8",
-                ByteArrayInputStream(modifiedHtml.toByteArray(Charsets.UTF_8))
-            )
-        } catch (e: Exception) {
-            null
+            else -> null
         }
     }
 
     private fun loadFromAssets(assetPath: String): WebResourceResponse? {
         return try {
             val stream = context.assets.open(assetPath)
-            val mime = guessMimeType(assetPath)
+            val mime = when {
+                assetPath.endsWith(".html") -> "text/html"
+                assetPath.endsWith(".js") -> "application/javascript"
+                assetPath.endsWith(".css") -> "text/css"
+                assetPath.endsWith(".webp") -> "image/webp"
+                assetPath.endsWith(".jpg") || assetPath.endsWith(".jpeg") -> "image/jpeg"
+                assetPath.endsWith(".png") -> "image/png"
+                assetPath.endsWith(".ico") -> "image/x-icon"
+                else -> "application/octet-stream"
+            }
             WebResourceResponse(mime, "UTF-8", stream)
         } catch (e: Exception) {
             null
@@ -98,39 +83,16 @@ class ApiProxyWebViewClient(
 
     private fun proxyToServer(targetUrl: String): WebResourceResponse? {
         return try {
-            val connection = URL(targetUrl).openConnection() as HttpURLConnection
-            connection.connectTimeout = 15000
-            connection.readTimeout = 15000
-
-            val mimeType = connection.contentType ?: "application/octet-stream"
-            val bodyStream = connection.inputStream
-            val bodyBytes = bodyStream?.readBytes()
-            connection.disconnect()
-
-            if (bodyBytes != null) {
-                WebResourceResponse(
-                    mimeType.split(";")[0].trim(),
-                    "UTF-8",
-                    ByteArrayInputStream(bodyBytes)
-                )
-            } else null
+            val conn = URL(targetUrl).openConnection() as HttpURLConnection
+            conn.connectTimeout = 15000
+            conn.readTimeout = 15000
+            val mime = conn.contentType ?: "application/octet-stream"
+            val body = conn.inputStream.readBytes()
+            conn.disconnect()
+            WebResourceResponse(mime.split(";")[0].trim(), "UTF-8",
+                ByteArrayInputStream(body))
         } catch (e: Exception) {
             null
-        }
-    }
-
-    private fun guessMimeType(path: String): String {
-        return when {
-            path.endsWith(".html") -> "text/html"
-            path.endsWith(".js") -> "application/javascript"
-            path.endsWith(".css") -> "text/css"
-            path.endsWith(".webp") -> "image/webp"
-            path.endsWith(".jpg") || path.endsWith(".jpeg") -> "image/jpeg"
-            path.endsWith(".png") -> "image/png"
-            path.endsWith(".ico") -> "image/x-icon"
-            path.endsWith(".svg") -> "image/svg+xml"
-            path.endsWith(".json") -> "application/json"
-            else -> "application/octet-stream"
         }
     }
 

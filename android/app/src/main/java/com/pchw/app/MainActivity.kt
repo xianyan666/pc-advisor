@@ -7,11 +7,13 @@ import android.view.MenuItem
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import com.pchw.app.util.ServerConfig
+import com.pchw.app.webview.ApiProxyWebViewClient
 import com.pchw.app.webview.WebViewSetup
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var serverConfig: ServerConfig
+    private lateinit var webClient: ApiProxyWebViewClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,14 +25,23 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         webView = findViewById(R.id.webview)
-        setupWebView()
-        webView.loadUrl("file:///android_asset/www/index.html")
+        setupAndLoad()
     }
 
     private var needsReload = false
 
-    private fun setupWebView() {
-        WebViewSetup.configure(webView, this, serverConfig.baseUrl)
+    private fun setupAndLoad() {
+        webClient = ApiProxyWebViewClient(this, serverConfig.baseUrl)
+        WebViewSetup.configure(webView, webClient)
+
+        val html = webClient.buildIndexHtml()
+        webView.loadDataWithBaseURL(
+            "http://localhost/",
+            html,
+            "text/html",
+            "UTF-8",
+            null
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -51,8 +62,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         if (needsReload) {
             needsReload = false
-            setupWebView()
-            webView.reload()
+            setupAndLoad()
         }
     }
 
