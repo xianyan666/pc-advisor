@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PC硬件推荐</string>
+    <string name="settings_title">服务器设置</string>
+    <string name="server_config_title">后端服务器配置</string>
+    <string name="server_host_label">服务器IP地址</string>
+    <string name="server_port_label">端口号</string>
+    <string name="save">保存</string>
+    <string name="test_connection">测试连接</string>
+    <string name="testing">正在测试连接…</string>
+    <string name="connection_success">连接成功！服务器响应：%1$s</string>
+    <string name="connection_fail_code">连接失败，HTTP状态码：%1$d</string>
+    <string name="connection_error">连接失败：%1$s</string>
+    <string name="fill_all_fields">请填写完整的IP地址和端口号</string>
+    <string name="settings_saved">配置已保存</string>
+    <string name="action_settings">服务器设置</string>
+</resources>

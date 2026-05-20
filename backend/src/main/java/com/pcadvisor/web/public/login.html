@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - PC硬件推荐系统</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- SweetAlert2 弹窗库 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- 配置Tailwind自定义主题 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#FF7D00',
+                        neutral: {
+                            100: '#F5F7FA',
+                            200: '#E4E7ED',
+                            300: '#C0C6CF',
+                            400: '#909399',
+                            500: '#606266',
+                            600: '#303133',
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
+                        'hover': '0 20px 40px -5px rgba(22, 93, 255, 0.15)',
+                    }
+                },
+            }
+        }
+    </script>
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .input-focus {
+                @apply border-primary ring-2 ring-primary/20;
+            }
+            .btn-gradient {
+                @apply bg-gradient-to-r from-primary to-primary/80;
+            }
+            .text-balance {
+                text-wrap: balance;
+            }
+            /* 管理员按钮样式 */
+            .admin-btn {
+                @apply text-sm px-4 py-1.5 rounded-full border border-primary/30 text-primary
+                hover:bg-primary/5 transition-all duration-200
+                focus:outline-none focus:ring-1 focus:ring-primary/50;
+            }
+        }
+    </style>
+    <style>
+        /* 全局样式 */
+        body {
+            background-color: #F5F7FA;
+            background-image:
+                    radial-gradient(circle at 10% 20%, rgba(22, 93, 255, 0.05) 0%, transparent 20%),
+                    radial-gradient(circle at 90% 80%, rgba(255, 125, 0, 0.05) 0%, transparent 20%);
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        /* 动画效果 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(22, 93, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(22, 93, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(22, 93, 255, 0); }
+        }
+
+        /* 加载动画 */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-6 relative">
+<!-- 管理员登录按钮 -->
+<button id="adminLoginBtn" class="admin-btn fixed top-4 right-4 flex items-center z-50">
+    <i class="fa fa-user-circle-o mr-1.5"></i>
+    <span>管理员登录</span>
+</button>
+
+<!-- 登录卡片 -->
+<div class="w-full max-w-md bg-white rounded-2xl shadow-card hover:shadow-hover transition-all duration-300 overflow-hidden fade-in">
+    <!-- 顶部装饰条 -->
+    <div class="h-2 bg-gradient-to-r from-primary to-secondary"></div>
+
+    <!-- 登录表单容器 -->
+    <div class="p-6 md:p-8">
+        <!-- Logo和标题 -->
+        <div class="text-center mb-8">
+            <div class="flex justify-center mb-3">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+                    <i class="fa fa-desktop text-white text-xl"></i>
+                </div>
+            </div>
+            <h1 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-neutral-600 mb-2">PC硬件推荐系统</h1>
+            <p class="text-neutral-400 text-sm text-balance">欢迎回来，请输入您的账户信息</p>
+        </div>
+
+        <!-- 登录表单 -->
+        <form id="loginForm" class="space-y-5">
+            <!-- 账号输入框 -->
+            <div class="space-y-2">
+                <label for="account" class="block text-sm font-medium text-neutral-500">
+                    <i class="fa fa-user-o mr-1"></i> 用户名、邮箱或电话
+                </label>
+                <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+                            <i class="fa fa-user-o"></i>
+                        </span>
+                    <input
+                            type="text"
+                            id="account"
+                            name="account"
+                            class="w-full pl-10 pr-4 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:input-focus transition-all duration-200"
+                            placeholder="请输入用户名、邮箱或手机号"
+                            required
+                    >
+                </div>
+                <p id="accountError" class="text-red-500 text-xs hidden"></p>
+            </div>
+
+            <!-- 密码输入框 -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <label for="password" class="block text-sm font-medium text-neutral-500">
+                        <i class="fa fa-lock-o mr-1"></i> 密码
+                    </label>
+                    <a href="#" class="text-xs text-primary hover:text-primary/80 transition-colors">忘记密码?</a>
+                </div>
+                <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+                            <i class="fa fa-lock-o"></i>
+                        </span>
+                    <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="w-full pl-10 pr-10 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:input-focus transition-all duration-200"
+                            placeholder="请输入密码"
+                            required
+                    >
+                    <button
+                            type="button"
+                            id="togglePassword"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400 hover:text-neutral-600 transition-colors"
+                    >
+                        <i class="fa fa-eye-slash"></i>
+                    </button>
+                </div>
+                <p id="passwordError" class="text-red-500 text-xs hidden"></p>
+            </div>
+
+            <!-- 记住我和登录按钮 -->
+            <div class="space-y-4">
+                <div class="flex items-center">
+                    <input
+                            type="checkbox"
+                            id="remember"
+                            name="remember"
+                            class="h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary/30"
+                    >
+                    <label for="remember" class="ml-2 block text-sm text-neutral-500">记住我（7天内自动登录）</label>
+                </div>
+
+                <button
+                        type="submit"
+                        id="loginBtn"
+                        class="w-full btn-gradient text-white font-medium py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                    <span id="loginText">登录账户</span>
+                    <div id="loadingSpinner" class="spinner ml-2 hidden"></div>
+                    <i id="loginIcon" class="fa fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </form>
+
+        <!-- 注册链接 -->
+        <div class="mt-8 text-center">
+            <p class="text-neutral-500 text-sm">
+                还没有账户?
+                <a href="register.html" class="text-primary font-medium hover:text-primary/80 transition-colors">立即注册</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript 功能实现 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取DOM元素
+        const loginForm = document.getElementById('loginForm');
+        const accountInput = document.getElementById('account');
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const accountError = document.getElementById('accountError');
+        const passwordError = document.getElementById('passwordError');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginText = document.getElementById('loginText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const loginIcon = document.getElementById('loginIcon');
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+
+        // 后端API配置（自动适配context-path）
+        const contextPath = '/' + window.location.pathname.split('/')[1];
+        const API_BASE_URL = window.location.origin + contextPath + '/api';
+        const LOGIN_API = `${API_BASE_URL}/auth/login`;
+
+        // 检查是否已登录
+        checkLoginStatus();
+
+        // 切换密码可见性
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+
+            const icon = togglePassword.querySelector('i');
+            if (type === 'text') {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        });
+
+        // 表单验证
+        function validateForm() {
+            let isValid = true;
+            const accountValue = accountInput.value.trim();
+            const passwordValue = passwordInput.value.trim();
+
+            // 清空错误信息
+            accountError.classList.add('hidden');
+            passwordError.classList.add('hidden');
+            accountInput.classList.remove('border-red-500');
+            passwordInput.classList.remove('border-red-500');
+
+            // 验证账户
+            if (!accountValue) {
+                showError(accountInput, accountError, '请输入用户名、邮箱或手机号');
+                isValid = false;
+            }
+
+            // 验证密码
+            if (!passwordValue) {
+                showError(passwordInput, passwordError, '请输入密码');
+                isValid = false;
+            } else if (passwordValue.length < 6) {
+                showError(passwordInput, passwordError, '密码长度不能少于6位');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // 显示错误
+        function showError(inputElement, errorElement, message) {
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+            inputElement.classList.add('border-red-500');
+        }
+
+        // 输入框实时验证
+        [accountInput, passwordInput].forEach(input => {
+            input.addEventListener('input', function() {
+                this.classList.remove('border-red-500');
+                if (this === accountInput) {
+                    accountError.classList.add('hidden');
+                } else {
+                    passwordError.classList.add('hidden');
+                }
+            });
+        });
+
+        // 表单提交处理
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // 执行验证
+            if (!validateForm()) {
+                return;
+            }
+
+            // 设置加载状态
+            setLoadingState(true);
+
+            // 构建请求数据
+            const loginData = {
+                username: accountInput.value.trim(),
+                password: passwordInput.value.trim()
+            };
+            const rememberMe = document.getElementById('remember').checked;
+
+            try {
+                // 发送登录请求
+                const response = await axios.post(LOGIN_API, loginData, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.data.code === 200) {
+                    // 登录成功
+                    const { token, username, userId, role } = response.data.data;
+
+                    // 保存token和用户信息
+                    saveLoginInfo(token, { username, userId, role }, rememberMe);
+
+                    // 显示成功消息
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '登录成功',
+                        text: `欢迎回来，${username}！`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    // 根据用户类型跳转到不同页面
+                    redirectAfterLogin(role);
+
+                } else {
+                    // 业务错误：后端正常返回了错误信息
+                    const errMsg = response.data.message || '登录失败';
+                    Swal.fire({
+                        icon: 'error',
+                        title: '登录失败',
+                        text: errMsg,
+                        confirmButtonText: '确定',
+                        confirmButtonColor: '#165DFF'
+                    });
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            } catch (error) {
+                // 网络错误：请求无法到达服务器
+                handleNetworkError(error);
+            } finally {
+                // 重置加载状态
+                setLoadingState(false);
+            }
+        });
+
+        // 设置加载状态
+        function setLoadingState(isLoading) {
+            if (isLoading) {
+                loginBtn.disabled = true;
+                loginText.textContent = '登录中...';
+                loginIcon.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
+            } else {
+                loginBtn.disabled = false;
+                loginText.textContent = '登录账户';
+                loginIcon.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        // 保存登录信息
+        function saveLoginInfo(token, userInfo, rememberMe) {
+            // 存储token
+            localStorage.setItem('access_token', token);
+            localStorage.setItem('user_info', JSON.stringify(userInfo));
+
+            // 如果选择记住我，设置7天有效期
+            if (rememberMe) {
+                const expirationDate = new Date();
+                expirationDate.setDate(expirationDate.getDate() + 7);
+                localStorage.setItem('token_expiration', expirationDate.toISOString());
+            } else {
+                // 会话存储
+                sessionStorage.setItem('access_token', token);
+                sessionStorage.setItem('user_info', JSON.stringify(userInfo));
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('user_info');
+                localStorage.removeItem('token_expiration');
+            }
+
+            // 设置全局认证头
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
+
+        // 检查登录状态
+        function checkLoginStatus() {
+            let token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+            let userInfo = localStorage.getItem('user_info') || sessionStorage.getItem('user_info');
+
+            if (token && userInfo) {
+                // 检查token是否过期
+                const expiration = localStorage.getItem('token_expiration');
+                if (expiration && new Date(expiration) < new Date()) {
+                    // token已过期
+                    clearLoginInfo();
+                    return;
+                }
+
+                // 设置axios头部
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+                // 如果已登录，显示欢迎信息
+                try {
+                    const user = JSON.parse(userInfo);
+                    console.log(`已登录用户: ${user.username}`);
+                } catch (e) {
+                    console.error('用户信息解析失败', e);
+                }
+            }
+        }
+
+        // 清除登录信息
+        function clearLoginInfo() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user_info');
+            localStorage.removeItem('token_expiration');
+            sessionStorage.removeItem('access_token');
+            sessionStorage.removeItem('user_info');
+            delete axios.defaults.headers.common['Authorization'];
+        }
+
+        // 登录后跳转
+        function redirectAfterLogin(role) {
+            window.location.href = contextPath + '/index.html';
+        }
+
+        // 处理网络错误（仅处理Axios抛出的网络/HTTP异常）
+        function handleNetworkError(error) {
+            console.error('网络错误:', error);
+
+            let errorMessage = '网络连接失败，请检查网络';
+
+            if (error.response) {
+                // 服务器返回了HTTP错误状态码
+                const httpStatus = error.response.status;
+                const serverMsg = error.response.data?.message;
+                switch (httpStatus) {
+                    case 400:
+                        errorMessage = serverMsg || '请求参数错误';
+                        break;
+                    case 401:
+                        errorMessage = serverMsg || '账号或密码错误';
+                        break;
+                    case 403:
+                        errorMessage = serverMsg || '账号被禁用或无权限';
+                        break;
+                    case 404:
+                        errorMessage = serverMsg || '接口不存在';
+                        break;
+                    case 500:
+                        errorMessage = serverMsg || '服务器内部错误';
+                        break;
+                    default:
+                        errorMessage = serverMsg || `请求失败 (HTTP ${httpStatus})`;
+                }
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: '登录失败',
+                text: errorMessage,
+                confirmButtonText: '确定',
+                confirmButtonColor: '#165DFF'
+            });
+        }
+
+        // 管理员登录按钮事件
+        adminLoginBtn.addEventListener('click', function() {
+            Swal.fire({
+                title: '管理员登录',
+                html: `
+                        <p class="text-gray-600 mb-4">管理员请使用管理员账号登录</p>
+                        <div class="text-left">
+                            <p class="text-sm text-gray-500 mb-2">示例账号：</p>
+                            <ul class="text-sm text-gray-700 space-y-1">
+                                <li>• 管理员ID: admin001</li>
+                                <li>• 密码: admin123</li>
+                            </ul>
+                        </div>
+                    `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: '前往管理员登录',
+                cancelButtonText: '取消',
+                confirmButtonColor: '#165DFF',
+                cancelButtonColor: '#6B7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 跳转到管理员登录页面或填充管理员账号
+                    accountInput.value = 'admin001';
+                    accountInput.focus();
+                    passwordInput.value = 'admin123';
+
+                    // 提示使用管理员账号
+                    Swal.fire({
+                        icon: 'info',
+                        title: '管理员账号已填充',
+                        text: '请输入管理员密码登录',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        });
+
+        // 回车键提交表单
+        loginForm.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !loginBtn.disabled) {
+                loginForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // 页面可见性变化时检查登录状态
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkLoginStatus();
+            }
+        });
+    });
+</script>
+</body>
+</html>

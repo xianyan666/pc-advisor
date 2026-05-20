@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>硬件推荐 - 专业的科技产品导购平台</title>
+  <!-- 引入外部资源 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0066CC', // 中关村蓝作为主色调
+            secondary: '#FF6600', // 橙色作为辅助色
+            dark: '#333333',
+            light: '#F5F7FA',
+            gray: {
+              100: '#F5F7FA',
+              200: '#E4E7ED',
+              300: '#C0C4CC',
+              400: '#909399',
+              500: '#606266',
+              600: '#303133',
+            }
+          },
+          fontFamily: {
+            sans: ['PingFang SC', 'Microsoft YaHei', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .card-hover {
+        @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+      }
+      .nav-active {
+        @apply text-primary border-b-2 border-primary;
+      }
+    }
+  </style>
+  
+  <style>
+    /* 全局样式 */
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    }
+    /* 轮播图指示器样式 */
+    .carousel-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: rgba(255,255,255,0.5);
+      transition: all 0.3s ease;
+    }
+    .carousel-dot.active {
+      background-color: #fff;
+      width: 30px;
+      border-radius: 6px;
+    }
+    /* 分类导航滚动条样式 */
+    .category-scrollbar::-webkit-scrollbar {
+      height: 4px;
+    }
+    .category-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #C0C4CC;
+      border-radius: 2px;
+    }
+    .category-scrollbar::-webkit-scrollbar-track {
+      background-color: #F5F7FA;
+    }
+  </style>
+</head>
+<body class="bg-light text-gray-600">
+  <!-- 顶部通知栏 -->
+  <div class="bg-primary text-white text-center py-1 text-sm">
+    <p>【618大促】全场硬件产品低至5折起，叠加优惠券更划算 <a href="#promotion" class="underline ml-2">立即抢购</a></p>
+  </div>
+
+  <!-- 头部导航区 -->
+  <header class="bg-white sticky top-0 z-50 shadow-sm transition-all duration-300" id="header">
+    <div class="container mx-auto px-4">
+      <!-- 顶部导航 -->
+      <div class="flex items-center justify-between py-3 border-b border-gray-200">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a href="#" class="flex items-center">
+            
+            <span class="ml-2 text-gray-600 font-medium">硬件推荐平台</span>
+          </a>
+        </div>
+        
+        <!-- 搜索框 -->
+        <div class="hidden md:flex items-center flex-1 max-w-xl mx-8">
+          <div class="relative w-full">
+            <input type="text" placeholder="搜索CPU、显卡、主板等硬件产品..." 
+                  class="w-full py-2 px-4 pl-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+            <i class="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+        
+        <!-- 用户区域 - 已删除购物车 -->
+        <div class="flex items-center space-x-4">
+          <a href="#" class="hidden md:block text-gray-500 hover:text-primary transition-colors">
+            <i class="fa fa-user-circle-o mr-1"></i> 登录
+          </a>
+          <button class="md:hidden text-gray-500" id="mobile-menu-btn">
+            <i class="fa fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- 主导航 - 只保留首页、DIY硬件、测评 -->
+      <nav class="hidden md:block">
+        <ul class="flex space-x-8">
+          <li><a href="#" class="nav-active py-3 inline-block font-medium">首页</a></li>
+          <li><a href="#" class="text-gray-500 hover:text-primary py-3 inline-block font-medium transition-colors">DIY硬件</a></li>
+          <li><a href="#" class="text-gray-500 hover:text-primary py-3 inline-block font-medium transition-colors">评测</a></li>
+        </ul>
+      </nav>
+      
+      <!-- 移动端搜索框 -->
+      <div class="md:hidden py-2 border-t border-gray-200">
+        <div class="relative">
+          <input type="text" placeholder="搜索CPU、显卡、主板等硬件产品..." 
+                class="w-full py-2 px-4 pl-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+          <i class="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        </div>
+      </div>
+      
+      <!-- 移动端导航菜单 - 只保留首页、DIY硬件、测评 -->
+      <div class="md:hidden hidden" id="mobile-menu">
+        <ul class="py-2">
+          <li><a href="#" class="block px-2 py-3 text-primary font-medium">首页</a></li>
+          <li><a href="#" class="block px-2 py-3 text-gray-500 hover:bg-gray-100">DIY硬件</a></li>
+          <li><a href="#" class="block px-2 py-3 text-gray-500 hover:bg-gray-100">评测</a></li>
+          <li class="border-t border-gray-200 pt-2">
+            <a href="#" class="block px-2 py-2 text-gray-500 hover:bg-gray-100">
+              <i class="fa fa-user-circle-o mr-1"></i> 登录/注册
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-4">
+    <!-- 轮播图区域 - 修正图文匹配 -->
+    <section class="relative rounded-xl overflow-hidden mb-8">
+      <div class="carousel relative h-[300px] md:h-[400px] lg:h-[500px]">
+        <!-- 轮播图片 -->
+        <div class="carousel-slides h-full">
+          <div class="carousel-slide absolute inset-0 opacity-100 transition-opacity duration-500">
+            <img src="https://picsum.photos/id/1/1600/900" alt="618大促活动" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center">
+              <div class="text-white ml-6 md:ml-12 max-w-md">
+                <h2 class="text-2xl md:text-4xl font-bold mb-2 text-shadow">618硬件狂欢节</h2>
+                <p class="text-sm md:text-base mb-4 text-gray-100">全场硬件低至5折，叠加优惠券最高立减1000元</p>
+                <a href="#promotion" class="inline-block bg-secondary hover:bg-secondary/90 text-white px-4 py-2 rounded-md transition-colors">
+                  立即抢购 <i class="fa fa-angle-right ml-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-500">
+            <img src="https://picsum.photos/id/96/1600/900" alt="显卡新品上市" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center">
+              <div class="text-white ml-6 md:ml-12 max-w-md">
+                <h2 class="text-2xl md:text-4xl font-bold mb-2 text-shadow">RTX 5090 震撼上市</h2>
+                <p class="text-sm md:text-base mb-4 text-gray-100">全新架构，性能翻倍，游戏体验再升级</p>
+                <a href="#" class="inline-block bg-secondary hover:bg-secondary/90 text-white px-4 py-2 rounded-md transition-colors">
+                  了解详情 <i class="fa fa-angle-right ml-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-500">
+            <img src="https://picsum.photos/id/20/1600/900" alt="主板推荐" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center">
+              <div class="text-white ml-6 md:ml-12 max-w-md">
+                <h2 class="text-2xl md:text-4xl font-bold mb-2 text-shadow">高端主板选购指南</h2>
+                <p class="text-sm md:text-base mb-4 text-gray-100">2024年最值得买的高性能主板推荐</p>
+                <a href="#" class="inline-block bg-secondary hover:bg-secondary/90 text-white px-4 py-2 rounded-md transition-colors">
+                  查看榜单 <i class="fa fa-angle-right ml-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 轮播控制按钮 -->
+        <button class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center transition-colors" id="prev-slide">
+          <i class="fa fa-angle-left text-xl"></i>
+        </button>
+        <button class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center transition-colors" id="next-slide">
+          <i class="fa fa-angle-right text-xl"></i>
+        </button>
+        
+        <!-- 轮播指示器 -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+          <span class="carousel-dot active" data-index="0"></span>
+          <span class="carousel-dot" data-index="1"></span>
+          <span class="carousel-dot" data-index="2"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 硬件分类导航 - 只保留CPU、显卡、主板 -->
+    <section class="mb-8">
+      <div class="bg-white rounded-xl shadow-sm p-4">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">硬件分类</h2>
+        <div class="category-scrollbar overflow-x-auto pb-2">
+          <ul class="flex space-x-6 md:space-x-8 min-w-max">
+            <li class="text-center">
+              <a href="#" class="flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
+                  <i class="fa fa-microchip text-xl"></i>
+                </div>
+                <span class="text-sm">CPU</span>
+              </a>
+            </li>
+            <li class="text-center">
+              <a href="#" class="flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
+                  <i class="fa fa-picture-o text-xl"></i>
+                </div>
+                <span class="text-sm">显卡</span>
+              </a>
+            </li>
+            <li class="text-center">
+              <a href="#" class="flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
+                  <i class="fa fa-server text-xl"></i>
+                </div>
+                <span class="text-sm">主板</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 热门推荐区域 - 修正所有产品图文匹配 -->
+    <section class="mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-gray-800">热门硬件推荐</h2>
+        <a href="#" class="text-primary hover:text-primary/80 text-sm flex items-center transition-colors">
+          查看更多 <i class="fa fa-angle-right ml-1"></i>
+        </a>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- 产品卡片1 - 显卡 -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover">
+          <div class="relative">
+            <img src="https://picsum.photos/id/96/400/300" alt="RTX 5090 显卡" class="w-full h-48 object-cover">
+            <span class="absolute top-2 left-2 bg-secondary text-white text-xs px-2 py-1 rounded">新品</span>
+          </div>
+          <div class="p-4">
+            <h3 class="font-medium text-gray-800 mb-1 line-clamp-1">NVIDIA GeForce RTX 5090 24GB 旗舰显卡</h3>
+            <div class="flex items-center text-yellow-400 text-sm mb-2">
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star-half-o"></i>
+              <span class="text-gray-400 ml-1">4.8 (126)</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-secondary font-bold text-lg">¥9999</span>
+                <span class="text-gray-400 text-sm line-through ml-1">¥11999</span>
+              </div>
+              <button class="bg-primary/10 hover:bg-primary/20 text-primary w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                <i class="fa fa-shopping-cart"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 产品卡片2 - CPU -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover">
+          <div class="relative">
+            <img src="https://picsum.photos/id/160/400/300" alt="Intel i9-14900K" class="w-full h-48 object-cover">
+            <span class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">热销</span>
+          </div>
+          <div class="p-4">
+            <h3 class="font-medium text-gray-800 mb-1 line-clamp-1">Intel 酷睿 i9-14900K 处理器</h3>
+            <div class="flex items-center text-yellow-400 text-sm mb-2">
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star-o"></i>
+              <span class="text-gray-400 ml-1">4.2 (89)</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-secondary font-bold text-lg">¥4299</span>
+                <span class="text-gray-400 text-sm line-through ml-1">¥4599</span>
+              </div>
+              <button class="bg-primary/10 hover:bg-primary/20 text-primary w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                <i class="fa fa-shopping-cart"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 产品卡片3 - 主板 -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover">
+          <div class="relative">
+            <img src="https://picsum.photos/id/20/400/300" alt="高端主板" class="w-full h-48 object-cover">
+          </div>
+          <div class="p-4">
+            <h3 class="font-medium text-gray-800 mb-1 line-clamp-1">华硕ROG Maximus Z790 高端主板</h3>
+            <div class="flex items-center text-yellow-400 text-sm mb-2">
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <span class="text-gray-400 ml-1">4.9 (235)</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-secondary font-bold text-lg">¥3299</span>
+                <span class="text-gray-400 text-sm line-through ml-1">¥3599</span>
+              </div>
+              <button class="bg-primary/10 hover:bg-primary/20 text-primary w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                <i class="fa fa-shopping-cart"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 产品卡片4 - CPU -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover">
+          <div class="relative">
+            <img src="https://picsum.photos/id/180/400/300" alt="AMD Ryzen 9" class="w-full h-48 object-cover">
+            <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">秒杀</span>
+          </div>
+          <div class="p-4">
+            <h3 class="font-medium text-gray-800 mb-1 line-clamp-1">AMD Ryzen 9 7950X 处理器</h3>
+            <div class="flex items-center text-yellow-400 text-sm mb-2">
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star"></i>
+              <i class="fa fa-star-half-o"></i>
+              <span class="text-gray-400 ml-1">4.7 (312)</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-secondary font-bold text-lg">¥3999</span>
+                <span class="text-gray-400 text-sm line-through ml-1">¥4599</span>
+              </div>
+              <button class="bg-primary/10 hover:bg-primary/20 text-primary w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                <i class="fa fa-shopping-cart"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 排行榜和资讯区域 - 修正图文匹配 -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <!-- 销量排行榜 - 已删除销量显示 -->
+      <div class="lg:col-span-1 bg-white rounded-xl shadow-sm p-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold text-gray-800">热门推荐榜</h2>
+          <div class="flex border rounded-md overflow-hidden text-sm">
+            <button class="px-3 py-1 bg-primary text-white">热门</button>
+            <button class="px-3 py-1 text-gray-500 hover:bg-gray-100 transition-colors">新品</button>
+            <button class="px-3 py-1 text-gray-500 hover:bg-gray-100 transition-colors">推荐</button>
+          </div>
+        </div>
+        <ul class="space-y-4">
+          <li class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+            <span class="w-6 h-6 rounded-full bg-secondary text-white flex items-center justify-center text-sm font-bold mr-3">1</span>
+            <img src="https://picsum.photos/id/180/100/100" alt="AMD Ryzen 7 处理器" class="w-12 h-12 object-cover rounded">
+            <div class="flex-1 ml-3">
+              <h3 class="text-sm font-medium text-gray-800 line-clamp-1">AMD Ryzen 7 7800X3D 处理器</h3>
+              <div class="flex justify-between items-center mt-1">
+                <span class="text-secondary text-sm font-bold">¥2499</span>
+              </div>
+            </div>
+          </li>
+          <li class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+            <span class="w-6 h-6 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-bold mr-3">2</span>
+            <img src="https://picsum.photos/id/96/100/100" alt="华硕ROG显卡" class="w-12 h-12 object-cover rounded">
+            <div class="flex-1 ml-3">
+              <h3 class="text-sm font-medium text-gray-800 line-clamp-1">华硕ROG Strix RTX 4070 Ti</h3>
+              <div class="flex justify-between items-center mt-1">
+                <span class="text-secondary text-sm font-bold">¥6299</span>
+              </div>
+            </div>
+          </li>
+          <li class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+            <span class="w-6 h-6 rounded-full bg-orange-600/70 text-white flex items-center justify-center text-sm font-bold mr-3">3</span>
+            <img src="https://picsum.photos/id/20/100/100" alt="微星主板" class="w-12 h-12 object-cover rounded">
+            <div class="flex-1 ml-3">
+              <h3 class="text-sm font-medium text-gray-800 line-clamp-1">微星MPG Z790 EDGE WIFI 主板</h3>
+              <div class="flex justify-between items-center mt-1">
+                <span class="text-secondary text-sm font-bold">¥2199</span>
+              </div>
+            </div>
+          </li>
+          <li class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+            <span class="w-6 h-6 rounded-full bg-gray-400 text-white flex items-center justify-center text-sm font-bold mr-3">4</span>
+            <img src="https://picsum.photos/id/160/100/100" alt="Intel i7处理器" class="w-12 h-12 object-cover rounded">
+            <div class="flex-1 ml-3">
+              <h3 class="text-sm font-medium text-gray-800 line-clamp-1">Intel 酷睿 i7-14700K 处理器</h3>
+              <div class="flex justify-between items-center mt-1">
+                <span class="text-secondary text-sm font-bold">¥3299</span>
+              </div>
+            </div>
+          </li>
+          <li class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+            <span class="w-6 h-6 rounded-full bg-gray-400 text-white flex items-center justify-center text-sm font-bold mr-3">5</span>
+            <img src="https://picsum.photos/id/96/100/100" alt="七彩虹显卡" class="w-12 h-12 object-cover rounded">
+            <div class="flex-1 ml-3">
+              <h3 class="text-sm font-medium text-gray-800 line-clamp-1">七彩虹RTX 5080 显卡</h3>
+              <div class="flex justify-between items-center mt-1">
+                <span class="text-secondary text-sm font-bold">¥7999</span>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <a href="#" class="block text-center text-primary text-sm mt-4 hover:underline">查看完整榜单</a>
+      </div>
+      
+      <!-- 硬件资讯 - 修正图文匹配 -->
+      <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold text-gray-800">硬件资讯</h2>
+          <a href="#" class="text-primary hover:text-primary/80 text-sm">更多资讯 <i class="fa fa-angle-right ml-1"></i></a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex">
+            <img src="https://picsum.photos/id/180/200/150" alt="AMD处理器资讯" class="w-28 h-20 object-cover rounded-lg">
+            <div class="ml-3 flex-1">
+              <h3 class="font-medium text-gray-800 text-sm line-clamp-2 hover:text-primary transition-colors">AMD发布Ryzen 8000G系列APU，核显性能大幅提升，性价比出众</h3>
+              <div class="flex items-center text-gray-400 text-xs mt-2">
+                <span><i class="fa fa-clock-o mr-1"></i> 2小时前</span>
+                <span class="mx-2">|</span>
+                <span><i class="fa fa-eye mr-1"></i> 1.2k</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex">
+            <img src="https://picsum.photos/id/96/200/150" alt="NVIDIA显卡资讯" class="w-28 h-20 object-cover rounded-lg">
+            <div class="ml-3 flex-1">
+              <h3 class="font-medium text-gray-800 text-sm line-clamp-2 hover:text-primary transition-colors">NVIDIA确认RTX 50系列显卡将采用新架构，性能提升预计超50%</h3>
+              <div class="flex items-center text-gray-400 text-xs mt-2">
+                <span><i class="fa fa-clock-o mr-1"></i> 5小时前</span>
+                <span class="mx-2">|</span>
+                <span><i class="fa fa-eye mr-1"></i> 3.5k</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex">
+            <img src="https://picsum.photos/id/160/200/150" alt="Intel处理器资讯" class="w-28 h-20 object-cover rounded-lg">
+            <div class="ml-3 flex-1">
+              <h3 class="font-medium text-gray-800 text-sm line-clamp-2 hover:text-primary transition-colors">Intel 14代酷睿处理器评测：游戏性能再创新高</h3>
+              <div class="flex items-center text-gray-400 text-xs mt-2">
+                <span><i class="fa fa-clock-o mr-1"></i> 昨天</span>
+                <span class="mx-2">|</span>
+                <span><i class="fa fa-eye mr-1"></i> 5.8k</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex">
+            <img src="https://picsum.photos/id/20/200/150" alt="主板对比资讯" class="w-28 h-20 object-cover rounded-lg">
+            <div class="ml-3 flex-1">
+              <h3 class="font-medium text-gray-800 text-sm line-clamp-2 hover:text-primary transition-colors">2024年高端主板选购指南：Z790 vs X670E对比</h3>
+              <div class="flex items-center text-gray-400 text-xs mt-2">
+                <span><i class="fa fa-clock-o mr-1"></i> 2天前</span>
+                <span class="mx-2">|</span>
+                <span><i class="fa fa-eye mr-1"></i> 4.3k</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 硬件趋势图表 -->
+        <div class="mt-6">
+          <h3 class="text-base font-bold text-gray-800 mb-3">硬件价格趋势</h3>
+          <div class="h-48">
+            <canvas id="priceChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 促销活动区域 - 修正图文匹配 -->
+    <section id="promotion" class="mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-gray-800">促销活动</h2>
+        <a href="#" class="text-primary hover:text-primary/80 text-sm flex items-center transition-colors">
+          全部活动 <i class="fa fa-angle-right ml-1"></i>
+        </a>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- 活动卡片1 - DIY硬件 -->
+        <div class="bg-gradient-to-br from-primary/90 to-primary rounded-xl overflow-hidden card-hover relative">
+          <div class="p-6 text-white">
+            <span class="inline-block bg-white/20 text-white text-xs px-2 py-1 rounded mb-3">限时特惠</span>
+            <h3 class="text-xl font-bold mb-2">DIY硬件专场</h3>
+            <p class="text-white/80 text-sm mb-4">CPU、显卡、主板等硬件产品低至7折</p>
+            <div class="flex items-center text-sm mb-4">
+              <span class="flex items-center">
+                <i class="fa fa-clock-o mr-1"></i> 剩余3天
+              </span>
+            </div>
+            <a href="#" class="inline-block bg-white text-primary px-4 py-2 rounded-md hover:bg-white/90 transition-colors">
+              立即参与
+            </a>
+          </div>
+          <img src="https://picsum.photos/id/1/600/400" alt="DIY硬件促销" class="absolute right-0 bottom-0 w-2/5 h-full object-cover opacity-20">
+        </div>
+        
+        <!-- 活动卡片2 - 显卡新品 -->
+        <div class="bg-gradient-to-br from-secondary/90 to-secondary rounded-xl overflow-hidden card-hover relative">
+          <div class="p-6 text-white">
+            <span class="inline-block bg-white/20 text-white text-xs px-2 py-1 rounded mb-3">新品首发</span>
+            <h3 class="text-xl font-bold mb-2">显卡新品上市</h3>
+            <p class="text-white/80 text-sm mb-4">RTX 50系列显卡首发特惠，赠游戏礼包</p>
+            <div class="flex items-center text-sm mb-4">
+              <span class="flex items-center">
+                <i class="fa fa-clock-o mr-1"></i> 剩余7天
+              </span>
+            </div>
+            <a href="#" class="inline-block bg-white text-secondary px-4 py-2 rounded-md hover:bg-white/90 transition-colors">
+              立即预约
+            </a>
+          </div>
+          <img src="https://picsum.photos/id/96/600/400" alt="显卡新品促销" class="absolute right-0 bottom-0 w-2/5 h-full object-cover opacity-20">
+        </div>
+        
+        <!-- 活动卡片3 - 主板专场 -->
+        <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden card-hover relative">
+          <div class="p-6 text-white">
+            <span class="inline-block bg-white/20 text-white text-xs px-2 py-1 rounded mb-3">满减优惠</span>
+            <h3 class="text-xl font-bold mb-2">高端主板专场</h3>
+            <p class="text-white/80 text-sm mb-4">满2000减300，满3000减500，叠加优惠券</p>
+            <div class="flex items-center text-sm mb-4">
+              <span class="flex items-center">
+                <i class="fa fa-clock-o mr-1"></i> 剩余12天
+              </span>
+            </div>
+            <a href="#" class="inline-block bg-white text-gray-800 px-4 py-2 rounded-md hover:bg-white/90 transition-colors">
+              查看详情
+            </a>
+          </div>
+          <img src="https://picsum.photos/id/20/600/400" alt="主板促销" class="absolute right-0 bottom-0 w-2/5 h-full object-cover opacity-20">
+        </div>
+      </div>
+    </section>
+
+    <!-- 新品上市区域 - 修正所有产品图文匹配 -->
+    <section class="mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-gray-800">新品上市</h2>
+        <a href="#" class="text-primary hover:text-primary/80 text-sm flex items-center transition-colors">
+          更多新品 <i class="fa fa-angle-right ml-1"></i>
+        </a>
+      </div>
+      
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <!-- 新品卡片1 - CPU -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover">
+          <div class="relative">
+            <img src="https://picsum.photos/id/180/300/300" alt="AMD Ryzen 9 处理器" class="w-full h-32 object-cover">
+            <span class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">新品</span>
+          </div>
+          <div class="p-3">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2">AMD Ryzen 9 8950X 处理器</h3>
+            <div class="flex justify-between items-center mt-2">
+              <span class="text-secondary text-sm font-bold">¥5999</span>
+              <button class="text-gray-400 hover:text-primary transition-colors">
+                <i class="fa fa-heart-o"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 新品卡片2 - 显卡 -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover">
+          <div class="relative">
+            <img src="https://picsum.photos/id/96/300/300" alt="NVIDIA RTX 5080 显卡" class="w-full h-32 object-cover">
+            <span class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">新品</span>
+          </div>
+          <div class="p-3">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2">NVIDIA RTX 5080 显卡</h3>
+            <div class="flex justify-between items-center mt-2">
+              <span class="text-secondary text-sm font-bold">¥7999</span>
+              <button class="text-gray-400 hover:text-primary transition-colors">
+                <i class="fa fa-heart-o"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 新品卡片3 - 主板 -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover">
+          <div class="relative">
+            <img src="https://picsum.photos/id/20/300/300" alt="华硕ROG主板" class="w-full h-32 object-cover">
+            <span class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">新品</span>
+          </div>
+          <div class="p-3">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2">华硕ROG Maximus Z890 主板</h3>
+            <div class="flex justify-between items-center mt-2">
+              <span class="text-secondary text-sm font-bold">¥3299</span>
+              <button class="text-gray-400 hover:text-primary transition-colors">
+                <i class="fa fa-heart-o"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 新品卡片4 - CPU -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover">
+          <div class="relative">
+            <img src="https://picsum.photos/id/160/300/300" alt="Intel i9处理器" class="w-full h-32 object-cover">
+            <span class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">新品</span>
+          </div>
+          <div class="p-3">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2">Intel i9-14900KS 处理器</h3>
+            <div class="flex justify-between items-center mt-2">
+              <span class="text-secondary text-sm font-bold">¥4599</span>
+              <button class="text-gray-400 hover:text-primary transition-colors">
+                <i class="fa fa-heart-o"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 新品卡片5 - 显卡 -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover">
+          <div class="relative">
+            <img src="https://picsum.photos/id/96/300/300" alt="AMD RX 7900 XTX 显卡" class="w-full h-32 object-cover">
+            <span class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">新品</span>
+          </div>
+          <div class="p-3">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2">AMD RX 7900 XTX 显卡</h3>
+            <div class="flex justify-between items-center mt-2">
+              <span class="text-secondary text-sm font-bold">¥5499</span>
+              <button class="text-gray-400 hover:text-primary transition-colors">
+                <i class="fa fa-heart-o"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 新品卡片6 - 主板 -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover">
+          <div class="relative">
+            <img src="https://picsum.photos/id/20/300/300" alt="微星主板" class="w-full h-32 object-cover">
+            <span class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">新品</span>
+          </div>
+          <div class="p-3">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2">微星MEG X670E ACE 主板</h3>
+            <div class="flex justify-between items-center mt-2">
+              <span class="text-secondary text-sm font-bold">¥2999</span>
+              <button class="text-gray-400 hover:text-primary transition-colors">
+                <i class="fa fa-heart-o"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚区域 - 调整快速链接 -->
+  <footer class="bg-gray-800 text-gray-400 py-8">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div>
+          <h3 class="text-white font-bold text-lg mb-4">关于我们</h3>
+          <p class="text-sm mb-4">ZOL硬件推荐平台是专业的科技产品导购平台，为用户提供最新、最全面的CPU、显卡、主板等硬件产品资讯、评测、报价和购买指南。</p>
+          <div class="flex space-x-4">
+            <a href="#" class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center hover:bg-primary transition-colors">
+              <i class="fa fa-weibo"></i>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center hover:bg-primary transition-colors">
+              <i class="fa fa-wechat"></i>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center hover:bg-primary transition-colors">
+              <i class="fa fa-youtube-play"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-white font-bold text-lg mb-4">快速链接</h3>
+          <ul class="grid grid-cols-2 gap-2 text-sm">
+            <li><a href="#" class="hover:text-white transition-colors">首页</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">DIY硬件</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">CPU频道</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">显卡频道</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">主板频道</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">评测中心</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">行情报价</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">促销活动</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-white font-bold text-lg mb-4">帮助中心</h3>
+          <ul class="text-sm space-y-2">
+            <li><a href="#" class="hover:text-white transition-colors">购物指南</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">支付方式</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">配送说明</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">售后服务</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">常见问题</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">联系我们</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-white font-bold text-lg mb-4">联系我们</h3>
+          <ul class="text-sm space-y-2">
+            <li class="flex items-center">
+              <i class="fa fa-phone mr-2 w-4 text-center"></i>
+              <span>400-888-8888</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fa fa-envelope-o mr-2 w-4 text-center"></i>
+              <span>support@zol.com</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fa fa-map-marker mr-2 w-4 text-center"></i>
+              <span>北京市海淀区中关村大街1号</span>
+            </li>
+          </ul>
+          <div class="mt-4">
+            <h4 class="text-white text-sm font-medium mb-2">关注微信公众号</h4>
+            <div class="w-32 h-32 bg-white flex items-center justify-center">
+              <span class="text-gray-400 text-xs">微信二维码</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-700 mt-8 pt-6 text-sm text-center">
+        <p>© 2025 ZOL硬件推荐平台 版权所有 | 京ICP备12345678号 | 京公网安备110108020256789号</p>
+        <p class="mt-2">本网站支持IPv6访问 | 营业执照 | 出版物经营许可证 | 网络文化经营许可证</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 返回顶部按钮 -->
+  <button id="back-to-top" class="fixed bottom-6 right-6 bg-primary text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-primary/90">
+    <i class="fa fa-angle-up text-xl"></i>
+  </button>
+
+  <!-- JavaScript -->
+  <script>
+    // 导航栏滚动效果
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.add('py-2', 'shadow');
+        header.classList.remove('py-4');
+      } else {
+        header.classList.remove('py-2', 'shadow');
+        header.classList.add('py-4');
+      }
+    });
+    
+    // 移动端菜单切换
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    // 轮播图功能
+    const carouselSlides = document.querySelectorAll('.carousel-slide');
+    const carouselDots = document.querySelectorAll('.carousel-dot');
+    const prevSlideBtn = document.getElementById('prev-slide');
+    const nextSlideBtn = document.getElementById('next-slide');
+    let currentSlide = 0;
+    let slideInterval;
+    
+    // 初始化轮播
+    function initCarousel() {
+      showSlide(currentSlide);
+      slideInterval = setInterval(nextSlide, 5000);
+    }
+    
+    // 显示指定幻灯片
+    function showSlide(index) {
+      // 隐藏所有幻灯片
+      carouselSlides.forEach(slide => {
+        slide.classList.add('opacity-0');
+        slide.classList.remove('opacity-100');
+      });
+      
+      // 移除所有指示器激活状态
+      carouselDots.forEach(dot => {
+        dot.classList.remove('active');
+      });
+      
+      // 显示当前幻灯片
+      carouselSlides[index].classList.add('opacity-100');
+      carouselSlides[index].classList.remove('opacity-0');
+      
+      // 激活当前指示器
+      carouselDots[index].classList.add('active');
+      
+      currentSlide = index;
+    }
+    
+    // 下一张幻灯片
+    function nextSlide() {
+      let newIndex = (currentSlide + 1) % carouselSlides.length;
+      showSlide(newIndex);
+    }
+    
+    // 上一张幻灯片
+    function prevSlide() {
+      let newIndex = (currentSlide - 1 + carouselSlides.length) % carouselSlides.length;
+      showSlide(newIndex);
+    }
+    
+    // 点击指示器切换幻灯片
+    carouselDots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        clearInterval(slideInterval);
+        showSlide(index);
+        slideInterval = setInterval(nextSlide, 5000);
+      });
+    });
+    
+    // 点击切换按钮
+    prevSlideBtn.addEventListener('click', () => {
+      clearInterval(slideInterval);
+      prevSlide();
+      slideInterval = setInterval(nextSlide, 5000);
+    });
+    
+    nextSlideBtn.addEventListener('click', () => {
+      clearInterval(slideInterval);
+      nextSlide();
+      slideInterval = setInterval(nextSlide, 5000);
+    });
+    
+    // 返回顶部按钮
+    const backToTopBtn = document.getElementById('back-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTopBtn.classList.remove('opacity-0', 'invisible');
+        backToTopBtn.classList.add('opacity-100', 'visible');
+      } else {
+        backToTopBtn.classList.add('opacity-0', 'invisible');
+        backToTopBtn.classList.remove('opacity-100', 'visible');
+      }
+    });
+    
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // 价格趋势图表
+    function initChart() {
+      const ctx = document.getElementById('priceChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+          datasets: [
+            {
+              label: '显卡价格',
+              data: [8500, 8200, 7900, 7600, 7300, 6900],
+              borderColor: '#0066CC',
+              backgroundColor: 'rgba(0, 102, 204, 0.1)',
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: 'CPU价格',
+              data: [4200, 4100, 3900, 3800, 3700, 3500],
+              borderColor: '#FF6600',
+              backgroundColor: 'rgba(255, 102, 0, 0.1)',
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: '主板价格',
+              data: [2800, 2750, 2680, 2600, 2550, 2499],
+              borderColor: '#36CFC9',
+              backgroundColor: 'rgba(54, 207, 201, 0.1)',
+              tension: 0.3,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                font: {
+                  size: 11
+                },
+                boxWidth: 10
+              }
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              grid: {
+                drawBorder: false
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // 页面加载完成后初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      initCarousel();
+      initChart();
+    });
+  </script>
+</body>
+</html>

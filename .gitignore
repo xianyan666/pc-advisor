@@ -1,0 +1,28 @@
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.iml
+
+# Backend
+backend/target/
+backend/.idea/
+backend/*.iml
+
+# Frontend
+frontend/vue-project/node_modules/
+frontend/vue-project/dist/
+
+# Claude
+.claude/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

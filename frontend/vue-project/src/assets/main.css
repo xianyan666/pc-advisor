@@ -1,0 +1,59 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #165DFF;
+  --color-secondary: #FF7D00;
+  --color-dark: #333333;
+  --color-light: #F5F7FA;
+  --color-gray-100: #F5F7FA;
+  --color-gray-200: #E4E7ED;
+  --color-gray-300: #C0C4CC;
+  --color-gray-400: #909399;
+  --color-gray-500: #606266;
+  --color-gray-600: #303133;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background-color: #F5F7FA;
+  color: #606266;
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+}
+
+.nav-active {
+  @apply text-primary border-b-2 border-primary;
+}
+
+.carousel-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.carousel-dot.active {
+  background-color: #fff;
+  width: 30px;
+  border-radius: 6px;
+}
+
+.category-scrollbar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.category-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #C0C4CC;
+  border-radius: 2px;
+}
+
+.category-scrollbar::-webkit-scrollbar-track {
+  background-color: #F5F7FA;
+}

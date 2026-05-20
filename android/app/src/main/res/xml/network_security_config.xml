@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext HTTP for LAN IP ranges -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+    <!-- Also allow all cleartext via manifest flag for arbitrary LAN IPs -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
