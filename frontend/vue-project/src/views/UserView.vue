@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { getCollections, getEvaluations, deleteEvaluation } from '@/api/user'
+import { getCollections, getEvaluations, deleteEvaluation, updateProfileUsername, resetProfilePassword, deleteAccount } from '@/api/user'
 import { getHardwareImage } from '@/utils/imageMapping'
 import type { CollectedItem, EvaluationItem } from '@/api/user'
 
@@ -14,6 +14,74 @@ const collections = ref<CollectedItem[]>([])
 const evaluations = ref<EvaluationItem[]>([])
 const loading = ref(true)
 const errorMsg = ref('')
+const usernameForm = ref(authStore.username)
+const newPassword = ref('')
+const profileSaving = ref(false)
+const passwordSaving = ref(false)
+const accountDeleting = ref(false)
+const profileMsg = ref('')
+const profileError = ref('')
+
+async function handleUpdateUsername() {
+  const nextUsername = usernameForm.value.trim()
+  profileMsg.value = ''
+  profileError.value = ''
+  if (!nextUsername) {
+    profileError.value = '用户名不能为空'
+    return
+  }
+  profileSaving.value = true
+  try {
+    const result = await updateProfileUsername(nextUsername)
+    authStore.updateUsername(result.username)
+    usernameForm.value = result.username
+    profileMsg.value = result.message || '用户名修改成功'
+  } catch (error) {
+    profileError.value = error instanceof Error ? error.message : '用户名修改失败'
+  } finally {
+    profileSaving.value = false
+  }
+}
+
+async function handleResetPassword() {
+  profileMsg.value = ''
+  profileError.value = ''
+  if (!newPassword.value.trim()) {
+    profileError.value = '请输入新密码'
+    return
+  }
+  if (!confirm('确定直接重置当前账号密码吗？')) return
+  passwordSaving.value = true
+  try {
+    const result = await resetProfilePassword(newPassword.value.trim())
+    newPassword.value = ''
+    profileMsg.value = result.message || '密码重置成功'
+  } catch (error) {
+    profileError.value = error instanceof Error ? error.message : '密码重置失败'
+  } finally {
+    passwordSaving.value = false
+  }
+}
+
+async function handleDeleteAccount() {
+  profileMsg.value = ''
+  profileError.value = ''
+  const firstConfirm = confirm('注销账户后，您的收藏、评测和评论将被永久删除，且无法恢复。确定继续吗？')
+  if (!firstConfirm) return
+  const secondConfirm = confirm(`请再次确认：确定注销当前账号「${authStore.username}」吗？`)
+  if (!secondConfirm) return
+
+  accountDeleting.value = true
+  try {
+    await deleteAccount()
+    authStore.logout()
+    router.replace('/login')
+  } catch (error) {
+    profileError.value = error instanceof Error ? error.message : '账户注销失败'
+  } finally {
+    accountDeleting.value = false
+  }
+}
 
 // 灯箱
 const lightboxVisible = ref(false)
@@ -123,6 +191,75 @@ onMounted(loadData)
           <div class="text-2xl font-bold text-primary">{{ evaluations.filter(e => e.auditState === 'approved').length }}</div>
           <div class="text-xs text-gray-400 mt-1">已通过评测</div>
         </div>
+      </div>
+    </div>
+
+    <!-- 个人信息修改 -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-bold text-gray-700 m-0">个人信息</h2>
+          <p class="text-sm text-gray-400 mt-1">修改用户名，或无需验证码直接重置密码</p>
+        </div>
+        <i class="fa fa-cog text-primary text-xl"></i>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gray-50 rounded-lg p-4">
+          <label class="block text-sm font-medium text-gray-600 mb-2">用户名</label>
+          <div class="flex gap-2">
+            <input
+              v-model="usernameForm"
+              type="text"
+              class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+              placeholder="请输入新的用户名"
+            />
+            <button
+              class="px-4 py-2 bg-primary text-white rounded-lg text-sm border-none cursor-pointer hover:bg-primary/90 transition-colors disabled:opacity-60"
+              :disabled="profileSaving"
+              @click="handleUpdateUsername"
+            >
+              {{ profileSaving ? '保存中...' : '保存' }}
+            </button>
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4">
+          <label class="block text-sm font-medium text-gray-600 mb-2">重置密码</label>
+          <div class="flex gap-2">
+            <input
+              v-model="newPassword"
+              type="password"
+              class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+              placeholder="输入新密码，无需验证码"
+            />
+            <button
+              class="px-4 py-2 bg-secondary text-white rounded-lg text-sm border-none cursor-pointer hover:bg-secondary/90 transition-colors disabled:opacity-60"
+              :disabled="passwordSaving"
+              @click="handleResetPassword"
+            >
+              {{ passwordSaving ? '重置中...' : '重置' }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div v-if="profileMsg" class="mt-3 text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">{{ profileMsg }}</div>
+      <div v-if="profileError" class="mt-3 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{{ profileError }}</div>
+    </div>
+
+    <!-- 账户注销 -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-red-100">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-red-600 m-0">注销账户</h2>
+          <p class="text-sm text-gray-400 mt-1">永久删除当前账号以及关联的收藏、评测和评论</p>
+        </div>
+        <button
+          class="px-4 py-2 bg-red-500 text-white rounded-lg text-sm border-none cursor-pointer hover:bg-red-600 transition-colors disabled:opacity-60"
+          :disabled="accountDeleting"
+          @click="handleDeleteAccount"
+        >
+          <i :class="accountDeleting ? 'fa fa-spinner fa-spin mr-1.5' : 'fa fa-trash-o mr-1.5'"></i>
+          {{ accountDeleting ? '注销中...' : '注销账户' }}
+        </button>
       </div>
     </div>
 

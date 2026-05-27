@@ -118,7 +118,7 @@ async function handleLogin() {
               <label for="password" class="block text-sm font-medium text-gray-500">
                 <i class="fa fa-lock mr-1"></i> 密码
               </label>
-              <a href="#" class="text-xs text-primary hover:text-primary/80 no-underline">忘记密码?</a>
+              <router-link to="/forgot-password" class="text-xs text-primary hover:text-primary/80 no-underline">忘记密码?</router-link>
             </div>
             <div class="relative">
               <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">

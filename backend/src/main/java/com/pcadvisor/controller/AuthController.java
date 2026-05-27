@@ -1,17 +1,23 @@
 // AuthController.java
 package com.pcadvisor.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pcadvisor.common.Result;
 import com.pcadvisor.dto.LoginRequest;
 import com.pcadvisor.dto.LoginResponse;
 import com.pcadvisor.dto.RegisterRequest;
 import com.pcadvisor.entity.OrdinaryUser;
+import com.pcadvisor.entity.User;
+import com.pcadvisor.mapper.OrdinaryUserMapper;
+import com.pcadvisor.mapper.UserMapper;
 import com.pcadvisor.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.DigestUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -22,6 +28,12 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private OrdinaryUserMapper ordinaryUserMapper;
 
     @PostMapping("/login")
     public Result<LoginResponse> login(@Validated @RequestBody LoginRequest request) {
@@ -67,6 +79,53 @@ public class AuthController {
             log.error("注册失败: {}", e.getMessage());
             return Result.error(e.getMessage());
         }
+    }
+
+    @PostMapping("/forgot-password/reset")
+    public Result<String> resetForgottenPassword(@RequestBody Map<String, Object> body) {
+        String account = String.valueOf(body.getOrDefault("account", "")).trim();
+        String newPassword = String.valueOf(body.getOrDefault("newPassword", "")).trim();
+
+        if (account.isBlank()) {
+            return Result.error("请输入用户名、邮箱或电话号");
+        }
+        if (newPassword.isBlank()) {
+            return Result.error("请输入新密码");
+        }
+        if (newPassword.length() < 6 || newPassword.length() > 32) {
+            return Result.error("新密码长度需在6-32之间");
+        }
+
+        User user = userMapper.selectOne(
+                new QueryWrapper<User>()
+                        .eq("username", account)
+                        .or()
+                        .eq("email", account)
+        );
+
+        if (user == null) {
+            OrdinaryUser ordinaryUser = ordinaryUserMapper.selectOne(
+                    new QueryWrapper<OrdinaryUser>()
+                            .eq("userName", account)
+                            .or()
+                            .eq("userMailbox", account)
+                            .or()
+                            .eq("userPhone", account)
+            );
+            if (ordinaryUser != null) {
+                user = userMapper.selectOne(
+                        new QueryWrapper<User>().eq("user_id", ordinaryUser.getUserId())
+                );
+            }
+        }
+
+        if (user == null) {
+            return Result.error("未找到匹配的账号");
+        }
+
+        user.setPassword(DigestUtils.md5DigestAsHex(newPassword.getBytes()));
+        userMapper.updateById(user);
+        return Result.success("密码重置成功，请使用新密码登录");
     }
 
     @GetMapping("/check-username")

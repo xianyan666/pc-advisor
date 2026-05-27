@@ -56,6 +56,18 @@ export function getEvaluations(): Promise<EvaluationItem[]> {
   return request.get('/user/profile/evaluations').then((res) => res.data.data)
 }
 
+export function updateProfileUsername(username: string): Promise<{ username: string; message: string }> {
+  return request.put('/user/profile/username', { username }).then((res) => res.data.data)
+}
+
+export function resetProfilePassword(newPassword: string): Promise<{ message: string }> {
+  return request.post('/user/profile/password/reset', { newPassword }).then((res) => res.data.data)
+}
+
+export function deleteAccount(): Promise<{ message: string }> {
+  return request.delete('/user/profile/account').then((res) => res.data.data)
+}
+
 export interface CollectResult {
   collected: boolean
   collectId?: string

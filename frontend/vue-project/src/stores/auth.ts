@@ -36,5 +36,14 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('userInfo')
   }
 
-  return { token, userInfo, isLoggedIn, isAdmin, username, login, register, logout }
+  function updateUsername(username: string) {
+    if (!userInfo.value) return
+    userInfo.value = {
+      ...userInfo.value,
+      username,
+    }
+    localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
+  }
+
+  return { token, userInfo, isLoggedIn, isAdmin, username, login, register, logout, updateUsername }
 })

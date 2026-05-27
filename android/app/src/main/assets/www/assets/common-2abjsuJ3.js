@@ -1,0 +1,1 @@
+import{t as e}from"./request-C7ZYxkOi.js";function t(e){let t=e.data;return t&&typeof t==`object`&&`data`in t?t.data:e.data}function n(){return e.get(`/test/hardware`).then(t)}export{n as t};

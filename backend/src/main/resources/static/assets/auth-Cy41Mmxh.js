@@ -1,0 +1,1 @@
+import{t as e}from"./request-C7ZYxkOi.js";function t(t){return e.post(`/auth/login`,t).then(e=>e.data)}function n(t){return e.post(`/auth/register`,t).then(e=>e.data)}function r(){return e.post(`/auth/logout`).then(e=>e.data)}function i(t){return e.post(`/auth/forgot-password/reset`,t).then(e=>e.data)}export{i,r as n,n as r,t};

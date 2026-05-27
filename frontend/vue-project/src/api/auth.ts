@@ -13,6 +13,15 @@ export function logout(): Promise<Result<string>> {
   return request.post('/auth/logout').then((res) => res.data)
 }
 
+export interface ForgotPasswordResetRequest {
+  account: string
+  newPassword: string
+}
+
+export function resetForgottenPassword(data: ForgotPasswordResetRequest): Promise<Result<string>> {
+  return request.post('/auth/forgot-password/reset', data).then((res) => res.data)
+}
+
 export function checkUsername(username: string): Promise<Result<boolean>> {
   return request.get('/auth/check-username', { params: { username } }).then((res) => res.data)
 }

@@ -8,6 +8,8 @@ import com.pcadvisor.entity.*;
 import com.pcadvisor.mapper.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -34,7 +36,135 @@ public class UserProfileController {
     private UserMapper userMapper;
 
     @Autowired
+    private OrdinaryUserMapper ordinaryUserMapper;
+
+    @Autowired
     private CommentMapper commentMapper;
+
+    // ==================== 个人信息相关 ====================
+
+    @PutMapping("/username")
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Map<String, Object>> updateUsername(@RequestBody Map<String, Object> body) {
+        String userId = getCurrentUserId();
+        String username = String.valueOf(body.getOrDefault("username", "")).trim();
+
+        if (username.isBlank()) {
+            throw new BusinessException("用户名不能为空");
+        }
+        if (username.length() < 2 || username.length() > 20) {
+            throw new BusinessException("用户名长度需在2-20之间");
+        }
+
+        User current = userMapper.selectOne(new QueryWrapper<User>().eq("user_id", userId));
+        if (current == null) {
+            throw new BusinessException("当前用户不存在");
+        }
+
+        User sameNameUser = userMapper.selectOne(new QueryWrapper<User>().eq("username", username));
+        if (sameNameUser != null && !Objects.equals(sameNameUser.getUserId(), userId)) {
+            throw new BusinessException("用户名已存在");
+        }
+
+        current.setUsername(username);
+        userMapper.updateById(current);
+
+        OrdinaryUser ordinaryUser = ordinaryUserMapper.selectById(userId);
+        if (ordinaryUser != null) {
+            ordinaryUser.setUserName(username);
+            ordinaryUserMapper.updateById(ordinaryUser);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("username", username);
+        result.put("message", "用户名修改成功");
+        return Result.success(result);
+    }
+
+    @PostMapping("/password/reset")
+    public Result<Map<String, Object>> resetPassword(@RequestBody Map<String, Object> body) {
+        String userId = getCurrentUserId();
+        String newPassword = String.valueOf(body.getOrDefault("newPassword", "")).trim();
+
+        if (newPassword.isBlank()) {
+            throw new BusinessException("新密码不能为空");
+        }
+        if (newPassword.length() < 6 || newPassword.length() > 32) {
+            throw new BusinessException("新密码长度需在6-32之间");
+        }
+
+        User current = userMapper.selectOne(new QueryWrapper<User>().eq("user_id", userId));
+        if (current == null) {
+            throw new BusinessException("当前用户不存在");
+        }
+
+        current.setPassword(DigestUtils.md5DigestAsHex(newPassword.getBytes()));
+        if (userMapper.updateById(current) <= 0) {
+            throw new BusinessException("密码重置失败");
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "密码重置成功");
+        return Result.success(result);
+    }
+
+    @DeleteMapping("/account")
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Map<String, Object>> deleteAccount() {
+        String userId = getCurrentUserId();
+
+        User current = userMapper.selectOne(new QueryWrapper<User>().eq("user_id", userId));
+        if (current == null) {
+            throw new BusinessException("当前用户不存在");
+        }
+        if ("ADMIN".equalsIgnoreCase(current.getRole())) {
+            throw new BusinessException("管理员账户不能在个人中心注销");
+        }
+
+        List<Evaluation> ownEvaluations = evaluationMapper.selectList(
+            new QueryWrapper<Evaluation>().eq("user_id", userId)
+        );
+        List<Integer> ownEvaluationIds = ownEvaluations.stream()
+            .map(Evaluation::getEvaluationId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+        if (!ownEvaluationIds.isEmpty()) {
+            List<Comment> evaluationComments = commentMapper.selectList(
+                new QueryWrapper<Comment>().in("evaluation_id", ownEvaluationIds)
+            );
+            List<String> evaluationCommentIds = evaluationComments.stream()
+                .map(Comment::getCommentId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+            if (!evaluationCommentIds.isEmpty()) {
+                mediaInfMapper.delete(new QueryWrapper<MediaInf>().in("comment_id", evaluationCommentIds));
+            }
+            commentMapper.delete(new QueryWrapper<Comment>().in("evaluation_id", ownEvaluationIds));
+            mediaInfMapper.delete(new QueryWrapper<MediaInf>().in("evaluation_id", ownEvaluationIds));
+            evaluationMapper.delete(new QueryWrapper<Evaluation>().in("EvaluationID", ownEvaluationIds));
+        }
+
+        List<Comment> ownComments = commentMapper.selectList(
+            new QueryWrapper<Comment>().eq("user_id", userId)
+        );
+        List<String> ownCommentIds = ownComments.stream()
+            .map(Comment::getCommentId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+        if (!ownCommentIds.isEmpty()) {
+            mediaInfMapper.delete(new QueryWrapper<MediaInf>().in("comment_id", ownCommentIds));
+            commentMapper.delete(new QueryWrapper<Comment>().in("CommentID", ownCommentIds));
+        }
+
+        collectMapper.delete(new QueryWrapper<Collect>().eq("user_id", userId));
+        ordinaryUserMapper.deleteById(userId);
+        userMapper.delete(new QueryWrapper<User>().eq("user_id", userId));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "账户已注销");
+        return Result.success(result);
+    }
 
     // ==================== 收藏相关 ====================
 
